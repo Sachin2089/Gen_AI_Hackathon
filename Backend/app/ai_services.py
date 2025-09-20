@@ -90,7 +90,7 @@ class LegalDocumentProcessor:
         Please analyze this legal document and provide a structured response with the following sections.
         For each section, provide content that can be rendered as HTML:
         
-        1. SIMPLIFIED_SUMMARY: A clear, plain-language summary in markdown format with proper paragraphs
+        1. SIMPLIFIED_SUMMARY: A clear, plain-language summary in markdown format with proper paragraphs. Be Specific about dates, Don't ignore it.
         2. KEY_CLAUSES: List the 5 most important clauses. For each clause, provide:
            - title: Short descriptive title
            - explanation: Plain-language explanation
@@ -213,17 +213,28 @@ class LegalDocumentProcessor:
         }
 
     async def answer_document_question(self, document_text: str, question: str) -> str:
+        sentences = [s.strip() for s in document_text.split('.') if len(s.strip()) > 20]
+        
+        sentence_embeddings = self.similarity_model.encode(sentences, convert_to_tensor=True)
+        question_embedding = self.similarity_model.encode(question, convert_to_tensor=True)
+        
+        hits = util.semantic_search(question_embedding, sentence_embeddings, top_k=5)
+        retrieved_passages = [sentences[hit['corpus_id']] for hit in hits[0]]
+
+        context = "\n".join(retrieved_passages)
+
         prompt = f"""
-        Based on this legal document, answer the user's question in simple, clear language.
-        Avoid legal jargon and explain things as if talking to a friend.
-        Format your response as HTML with proper paragraphs and emphasis where needed.
-        
-        Document: {document_text[:2000]}...
-        
+        You are a legal assistant. 
+        Use the provided context from the legal document to answer the user's question.
+        Do NOT make up information. If the answer is not in the context, say so.
+
+        Context:
+        {context}
+
         Question: {question}
-        
-        Provide your answer in HTML format with <p>, <strong>, <em> tags as needed.
-        """
+
+        Answer in HTML (<p>, <strong>, <em>) format, simple and clear:
+        5"""
         
         response = self.model.generate_content(prompt)
         return f"<div class='qa-response'>{response.text}</div>"
