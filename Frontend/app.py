@@ -4,7 +4,8 @@ import json
 import re
 
 import os
-API_BASE = os.getenv("API_BASE", "http://backend:8089")
+#API_BASE = os.getenv("API_BASE", "http://backend:8089")
+API_BASE = "http://localhost:8089"
 
 st.set_page_config(page_title="Legal Document Simplifier", layout="wide")
 
