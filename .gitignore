@@ -2,3 +2,4 @@
 venv 
 Backend/app/extracted_texts
 Backend/keys
+.env
