@@ -14,6 +14,7 @@ class LegalDocumentProcessor:
     def __init__(self):
        
         project_id = os.getenv("GOOGLE_CLOUD_PROJECT_ID")
+        print("project_ID ", project_id)
         vertexai.init(project=project_id, location="us-central1")
     
         self.doc_ai_client = documentai.DocumentProcessorServiceClient()

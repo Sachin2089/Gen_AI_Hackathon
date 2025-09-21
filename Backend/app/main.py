@@ -61,7 +61,7 @@ async def upload_document(
         file_content = await file.read()
         print(f"Read {len(file_content)} bytes from file")
 
-        # Extract text based on file type
+
         if file.filename.endswith('.pdf'):
             print("Processing as PDF...")
             extracted_text = await ai_processor.extract_text_from_pdf(
