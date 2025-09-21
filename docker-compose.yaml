@@ -41,7 +41,7 @@ services:
     build: ./Frontend
     container_name: legal_streamlit
     ports:
-      - "8501:8501"
+      - "80:80"
     depends_on:
       - backend
     environment:

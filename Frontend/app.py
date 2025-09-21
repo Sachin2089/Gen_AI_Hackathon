@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-API_BASE = os.getenv("API_BASE")
+# API_BASE = os.getenv("API_BASE")
+API_BASE = "http://104.197.0.144:8080"
 st.set_page_config(page_title="Legal Simplifier", layout="wide")
 
 # ---------------------------
