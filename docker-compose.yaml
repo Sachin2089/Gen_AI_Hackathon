@@ -28,10 +28,11 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+    env_file: ./.env
     environment:
       - GOOGLE_CLOUD_PROJECT_ID=gen-ai-hackathon-471308
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/keys/gen-ai-hackathon-471308-d75b11abf148.json
-      - GEMINI_API_KEY=AAIzaSyAzsUIUfvuL7SjXb7Gtokmd2_CqEESjeXc
+      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     volumes:
       - /home/sachin2089/documet_analyzer/Gen_AI_Hackathon/Backend/keys/gen-ai-hackathon-471308-d75b11abf148.json:/app/keys/gen-ai-hackathon-471308-bbadeb147ac0.json  # mount your credentials
