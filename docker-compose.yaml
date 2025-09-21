@@ -1,0 +1,75 @@
+# services:
+#   postgres:
+#     image: postgres:15-alpine
+#     container_name: ${POSTGRES_CONTAINER_NAME:-legal_simplifier}
+#     restart: unless-stopped
+#     env_file: ./.env
+#     environment:
+#       POSTGRES_USER: ${POSTGRES_USER}
+#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#       POSTGRES_DB: ${POSTGRES_DB}
+#       TZ: "UTC"
+#     ports:
+#       - "${POSTGRES_PORT:-5430}:5432"  
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 5
+
+# volumes:
+#   postgres_data:
+
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ${POSTGRES_CONTAINER_NAME:-legal_simplifier}
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      TZ: "UTC"
+    ports:
+      - "${POSTGRES_PORT:-5430}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./Backend
+    container_name: legal_backend
+    ports:
+      - "8089:8089"
+    depends_on:
+      - postgres
+    environment:
+      - GOOGLE_CLOUD_PROJECT_ID=gen-ai-hackathon-471308
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/keys/gen-ai-hackathon-471308-bbadeb147ac0.json
+      - GEMINI_API_KEY=AAIzaSyAzsUIUfvuL7SjXb7Gtokmd2_CqEESjeXc
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    volumes:
+      - ./Backend/keys:/app/keys  # mount your credentials
+
+  streamlit:
+    build: ./Frontend
+    container_name: legal_streamlit
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+    environment:
+      - API_BASE=http://backend:8080
+    volumes:
+      - ./frontend:/app
+
+volumes:
+  postgres_data:
