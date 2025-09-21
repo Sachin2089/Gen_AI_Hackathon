@@ -83,31 +83,53 @@ class LegalDocumentProcessor:
 
     async def simplify_legal_document(self, text: str, document_type: str = "contract") -> dict:
         prompt = f"""
-        You are a legal expert specializing in making complex legal documents accessible to everyday people.
-        
-        Document Type: {document_type}
-        
-        Please analyze this legal document and provide a structured response with the following sections.
-        For each section, provide content that can be rendered as HTML:
-        
-        1. SIMPLIFIED_SUMMARY: A clear, plain-language summary in markdown format with proper paragraphs. Be Specific about dates, Don't ignore it.
-        2. KEY_CLAUSES: List the 5 most important clauses. For each clause, provide:
-           - title: Short descriptive title
-           - explanation: Plain-language explanation
-           - importance: Why this clause matters (High/Medium/Low)
-           - original_excerpt: The actual text from the document (if identifiable)
-        3. RISK_ASSESSMENT: 
-           - overall_risk: Number from 1-10
-           - risk_factors: List of specific risks with severity levels
-        4. IMPORTANT_TERMS: Key legal terms with definitions
-        5. ACTION_ITEMS: Specific things the reader should know or do
-        
-        Make everything conversational and easy to understand. Avoid legal jargon.
-        Format your response as valid JSON.
-        
-        Document text:
-        {text}
-        """
+You are a senior legal assistant tasked with simplifying and analyzing complex legal documents 
+so that non-lawyers can easily understand their rights, duties, and risks.
+
+Document Type: {document_type}
+
+Your job is to analyze the document carefully and return a structured JSON object.  
+⚠️ The JSON must be valid and strictly follow the schema below.  
+All content should be conversational, specific, and written in plain English. Avoid vague wording and do not skip dates, amounts, or obligations.
+
+Schema and Instructions:
+
+1. SIMPLIFIED_SUMMARY:
+   - A clear, plain-language overview of the whole document.
+   - Write in short paragraphs, highlight critical dates, durations, amounts, and obligations.
+   - Must be easy for a layperson to understand.
+
+2. KEY_CLAUSES:
+   - Extract the 5 most important clauses.
+   - Each clause must have:
+       - "title": Short descriptive title
+       - "explanation": Plain-language explanation of what it means
+       - "importance": One of ["High", "Medium", "Low"]
+       - "original_excerpt": Direct text snippet from the document (if identifiable)
+
+3. RISK_ASSESSMENT:
+   - "overall_risk": Integer 1–10 (1 = very safe, 10 = very risky)
+   - "risk_factors": List of risks. Each must include:
+       - "risk": Short description
+       - "severity": One of ["High", "Medium", "Low"]
+       - "details": Explanation of why it matters
+
+4. IMPORTANT_TERMS:
+   - List of legal terms or jargon from the document with simple definitions.
+
+5. ACTION_ITEMS:
+   - A checklist of specific things the reader must do, remember, or watch out for.
+   - Be practical and actionable (e.g., "Pay security deposit by June 15, 2025").
+
+Formatting Rules:
+- Return only valid JSON (no markdown code fences, no extra commentary).
+- Use HTML tags (like <p>, <strong>, <ul>, <li>) inside text fields so the content can be rendered directly.
+- Keep tone professional but friendly, like explaining to a client.
+
+Document Text:
+{text}
+"""
+
         
         response = self.model.generate_content(prompt)
         
